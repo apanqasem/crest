@@ -1,0 +1,54 @@
+CC=gcc
+
+LIBS=-lfl
+FLAGS=-Wall -O2 -g
+INCLUDE=-I. -I../
+
+SCAN_DBUG=#-DSCAN_DBUG  # -DSTRTAB_DBUG
+PARSE_DBUG=-DP_TREE #-DPARSE_DBUG 
+
+OBJS=lex.yy.o symTab.o ast.o cuda.tab.o prettyPrint.o errors.o main.o
+
+curt: $(OBJS)
+	$(CXX) -o curt $(OBJS) $(LIBS)
+
+cuda.tab.o: cuda.tab.c cuda.h
+	$(CXX) $(INCLUDE) $(FLAGS) $(PARSE_DBUG) -c cuda.tab.c 
+
+cuda.tab.h: cuda.y
+	bison -v -d -b cuda cuda.y 
+
+cuda.tab.c: cuda.y
+	bison -v -d -b cuda cuda.y 
+
+ast.o: ast.C ast.h astutil.h
+	$(CXX) $(INCLUDE) $(FLAGS) -c ast.C
+
+
+errors.o: errors.C errors.h 
+	$(CXX) $(INCLUDE) $(FLAGS) -c errors.C
+
+main.o: main.C
+	$(CXX) $(INCLUDE) $(FLAGS) -c main.C
+
+
+
+prettyPrint.o: prettyPrint.C prettyPrint.h 
+	$(CXX) $(INCLUDE) $(FLAGS) $(PARSE_DBUG) -c prettyPrint.C
+
+lex.yy.o: lex.yy.c cuda.h
+	$(CXX) $(INCLUDE) $(FLAGS) $(SCAN_DBUG) -c lex.yy.c
+
+lex.yy.c: cuda.l cuda.tab.h
+	flex $(SCAN_DBUG) cuda.l
+
+symTab.o: symTab.C symTab.h
+	$(CXX) $(INCLUDE) $(FLAGS) $(SCAN_DBUG) -c symTab.C
+
+codeGen.o: codeGen.h codeGen.c
+	$(CC) $(INCLUDE) $(FLAGS) -c codeGen.c
+
+clean: clean_all
+
+clean_all:
+	rm -f *.o cuda.tab.* lex.yy.c curt cuda.output

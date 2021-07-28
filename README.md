@@ -1,4 +1,4 @@
-README file for CREST 0.1
+README file for CREST 0.1 (ported from _old_ svn repo ~2013)
 
 ### Description 
 
